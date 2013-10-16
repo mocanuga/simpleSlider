@@ -2,14 +2,16 @@
     'use strict';
     var container = null,
         Slider = {},
-        currentValue = null;
+        currentValue = null,
+        $d = $(document);
     Slider = {
         init: function (options) {
             this.opts = options;
             this.handle = container.find('a');
+            this.bounds = this.getBounds(this.handle, container);
             this.handle.css({'-webkit-touch-callout': 'none', '-webkit-user-select': 'none', '-khtml-user-select': 'none', '-moz-user-select': 'none', '-ms-user-select': 'none', 'user-select': 'none'});
             this.bindEvents();
-            $(document).trigger('mousemove');
+            $d.trigger('mousemove');
         },
         bindEvents: function () {
             var local = this,
@@ -19,8 +21,21 @@
                 mouseDown = false,
                 init = false,
                 posX   = 0,
-                innerX = 0,
-                bounds = local.getBounds(local.handle);
+                innerX = 0;
+            container.css('cursor', 'pointer').on('click', function (e) {
+                posX = e.pageX - innerX;
+                var m = {
+                        left: posX < local.bounds.left ? local.bounds.left : (posX > local.bounds.right ? local.bounds.right : posX)
+                    },
+                    percent = local.getPercentageByValue(posX, {min: local.bounds.left, max: local.bounds.right}),
+                    value = local.getValueByPercentage(percent, local.opts.interval);
+                if (value >= local.opts.min) {
+                    local.handle.offset(m);
+                    currentValue = value;
+                    if (typeof local.opts.slide === 'function')
+                        local.opts.slide.apply(this, [value, percent, m.left]);
+                }
+            });
             local.handle.off().on("mousedown", function (e) {
                 innerX = e.pageX - $(this).offset().left;
                 mouseDown = true;
@@ -28,13 +43,13 @@
             }).on("mouseup", function () {
                 mouseDown = false;
             });
-            $(document).off().on("mousemove", function (e) {
+            $d.off().on("mousemove", function (e) {
                 if (mouseDown) {
-                    posX = e.pageX - innerX + 4;
+                    posX = e.pageX - innerX;
                     var m = {
-                            left: posX < bounds.left ? bounds.left - 1 : (posX > bounds.right ? bounds.right + 1 : posX)
+                            left: posX < local.bounds.left ? local.bounds.left : (posX > local.bounds.right ? local.bounds.right : posX)
                         },
-                        percent = local.getPercentageByValue(posX, {min: bounds.left, max: bounds.right}),
+                        percent = local.getPercentageByValue(posX, {min: local.bounds.left, max: local.bounds.right}),
                         value = local.getValueByPercentage(percent, local.opts.interval);
                     if (value >= local.opts.min) {
                         local.handle.offset(m);
@@ -46,7 +61,7 @@
                 if (init === false) {
                     init = true;
                     initValue = local.getPercentageByValue(min, local.opts.interval);
-                    left = local.getValueByPercentage(initValue, {min: bounds.left, max: bounds.right});
+                    left = local.getValueByPercentage(initValue, {min: local.bounds.left, max: local.bounds.right});
                     local.handle.offset({
                         left: left
                     });
@@ -58,13 +73,13 @@
                 e.preventDefault();
             });
         },
-        getBounds: function (handle) {
+        getBounds: function (handle, container) {
             var offset = container.offset();
             return {
                 bottom: offset.top + container.height() - handle.width(),
                 left: offset.left,
                 right: offset.left + container.width() - handle.width(),
-                top: offset.top - handle.offset().top + 2
+                top: offset.top - handle.offset().top
             };
         },
         getPercentageByValue: function (value, range) {
@@ -78,7 +93,7 @@
         },
         destroy: function () {
             this.handle.off();
-            $(document).off('mousemove mouseup');
+            $d.off('mousemove mouseup');
         }
     };
     $.fn.extend({
