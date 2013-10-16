@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>jQuery PLUGINS</title>
+    <style type="text/css" media="screen">
+        .wrapper {position: relative;}
+
+        .slider {background: #FB7700;clear: both;display: block;height: 4px;margin: 200px 20%;overflow: visible;position: relative;width: 60%;}
+        .slider .range {background: transparent;border-top: 4px solid #5889E1;display: block;height: 16px;left: 0;position: absolute;right: 0;top: 0;}
+        .slider a {background: #bbb;border: 1px solid #888;display: block;height: 22px;left: -2px;opacity:.7;position: absolute;top: -2px;width: 8px;}
+        .slider a.max {left: auto;right: -2px;}
+        .slider .label {display: block;color: #333;position: relative;}
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <div class="sliderInfo"></div>
+    <div class="slider">
+        <div class="range"></div>
+        <a href="javascript:;" class="slide"></a>
+    </div>
+</div>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script type="text/javascript" src="slider.js"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+       $('.slider').simpleSlider({
+           interval: {
+               min: 18,
+               max: 80
+           },
+           min: 24,
+           slide: function (value, percent, offset) {
+               $('.sliderInfo').text(value + ' anni');
+               $('.range').offset({
+                   left: offset
+               })
+           }
+       });
+    });
+</script>
+</body>
+</html>
