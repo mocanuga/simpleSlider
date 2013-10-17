@@ -1,79 +1,28 @@
+/**
+ * Created with IntelliJ IDEA.
+ * User: adi
+ * Date: 10/17/13
+ * Time: 11:37 AM
+ * To change this template use File | Settings | File Templates.
+ * global jQuery
+ */
 (function ($) {
-    'use strict';
-    var container = null,
-        Slider = {},
-        currentValue = null,
-        $d = $(document);
-    Slider = {
-        init: function (options) {
-            this.opts = options;
-            this.handle = container.find('a');
-            this.bounds = this.getBounds(this.handle, container);
-            this.handle.css({'-webkit-touch-callout': 'none', '-webkit-user-select': 'none', '-khtml-user-select': 'none', '-moz-user-select': 'none', '-ms-user-select': 'none', 'user-select': 'none'});
-            this.bindEvents();
-            $d.trigger('mousemove');
-        },
-        bindEvents: function () {
-            var local = this,
-                initValue = 0,
-                min = currentValue > 0 ? currentValue : local.opts.min,
-                left = 0,
-                mouseDown = false,
-                init = false,
-                posX   = 0,
-                innerX = 0;
-            container.css('cursor', 'pointer').on('click', function (e) {
-                posX = e.pageX - innerX;
-                var m = {
-                        left: posX < local.bounds.left ? local.bounds.left : (posX > local.bounds.right ? local.bounds.right : posX)
-                    },
-                    percent = local.getPercentageByValue(posX, {min: local.bounds.left, max: local.bounds.right}),
-                    value = local.getValueByPercentage(percent, local.opts.interval);
-                if (value >= local.opts.min) {
-                    local.handle.offset(m);
-                    currentValue = value;
-                    if (typeof local.opts.slide === 'function')
-                        local.opts.slide.apply(this, [value, percent, m.left]);
-                }
-            });
-            local.handle.off().on("mousedown", function (e) {
-                innerX = e.pageX - $(this).offset().left;
-                mouseDown = true;
-                e.preventDefault();
-            }).on("mouseup", function () {
-                mouseDown = false;
-            });
-            $d.off().on("mousemove", function (e) {
-                if (mouseDown) {
-                    posX = e.pageX - innerX;
-                    var m = {
-                            left: posX < local.bounds.left ? local.bounds.left : (posX > local.bounds.right ? local.bounds.right : posX)
-                        },
-                        percent = local.getPercentageByValue(posX, {min: local.bounds.left, max: local.bounds.right}),
-                        value = local.getValueByPercentage(percent, local.opts.interval);
-                    if (value >= local.opts.min) {
-                        local.handle.offset(m);
-                        currentValue = value;
-                        if (typeof local.opts.slide === 'function')
-                            local.opts.slide.apply(this, [value, percent, m.left]);
-                    }
-                }
-                if (init === false) {
-                    init = true;
-                    initValue = local.getPercentageByValue(min, local.opts.interval);
-                    left = local.getValueByPercentage(initValue, {min: local.bounds.left, max: local.bounds.right});
-                    local.handle.offset({
-                        left: left
-                    });
-                    if (typeof local.opts.slide === 'function')
-                        local.opts.slide.apply(this, [min, initValue, left]);
-                }
-            }).on('mouseup', function (e) {
-                    mouseDown = false;
-                e.preventDefault();
-            });
-        },
-        getBounds: function (handle, container) {
+    var $d = $(document),
+        $w = $(window);
+
+    function Slider (opts) {
+        var self = this,
+            state = {
+                innerX: 0,
+                innerY: 0,
+                mouseDown: false,
+                currentValue: false,
+                init: false
+            },
+            container = opts.container,
+            handle = container.find('a'),
+            bounds = {};
+        this.setBounds = function () {
             var offset = container.offset();
             return {
                 bottom: offset.top + container.height() - handle.width(),
@@ -81,29 +30,80 @@
                 right: offset.left + container.width() - handle.width(),
                 top: offset.top - handle.offset().top
             };
-        },
-        getPercentageByValue: function (value, range) {
+        };
+        this.getPercentageByValue = function (value, range) {
             var percentage = 100 * (value - range.min) / (range.max - range.min);
             percentage = percentage > 100 ? 100 : percentage;
             percentage = percentage < 0 ? 0 : percentage;
             return Math.round(percentage);
-        },
-        getValueByPercentage: function (percent, range) {
+        };
+        this.getValueByPercentage = function (percent, range) {
             return Math.round((((range.max - range.min ) / 100) * percent) + range.min);
-        },
-        destroy: function () {
-            this.handle.off();
-            $d.off('mousemove mouseup');
-        }
-    };
+        };
+        this.handleMove = function (position) {
+            var m = {},
+                percent = 0,
+                value = 0;
+            if(opts.direction === 'horizontal') {
+                percent = self.getPercentageByValue(position.x, {min: bounds.left, max: bounds.right});
+                value = self.getValueByPercentage(percent, opts.interval);
+                m.left = position.x < bounds.left ? bounds.left : (position.x > bounds.right ? bounds.right : position.x);
+            }
+            if(opts.direction === 'vertical') {
+                percent = self.getPercentageByValue(position.y, {min: bounds.top, max: bounds.bottom});
+                value = self.getValueByPercentage(percent, opts.interval);
+                m.top = position.y < bounds.top ? bounds.top : (position.y > bounds.bottom ? bounds.bottom : position.y);
+            }
+            if (value >= opts.min) {
+                handle.offset(m);
+                state.currentValue = value;
+                if (typeof opts.slide === 'function')
+                    opts.slide.apply(this, [container, value, percent, m.left]);
+            }
+        };
+        this.bindEvents = function () {
+            container.css('cursor', 'pointer').on('click', function (e) {
+                self.handleMove({x: e.pageX - state.innerX, y: e.pageY - state.innerY});
+            });
+            handle.off().on("mousedown", function (e) {
+                state.innerX = e.pageX - handle.offset().left;
+                state.innerY = e.pageY - handle.offset().top;
+                state.mouseDown = true;
+                e.preventDefault();
+            }).on("mouseup", function () {
+                state.mouseDown = false;
+            });
+            $d.on("mousemove", function (e) {
+                if (state.mouseDown) {
+                    self.handleMove({x: e.pageX - state.innerX,y: e.pageY - state.innerY });
+                }
+                if (state.init === false) {
+                    state.init = true;
+                    self.handleMove({x: self.getValueByPercentage(self.getPercentageByValue(state.currentValue || opts.min, opts.interval), {min: bounds.left, max: bounds.right}), y: e.pageY - state.innerY});
+                }
+            }).on('mouseup', function (e) {
+                state.mouseDown = false;
+                e.preventDefault();
+            });
+            $w.on('resize', function () {
+                bounds = self.setBounds();
+                state.init = false;
+                $d.trigger('mousemove');
+            });
+        };
+        this.construct = function () {
+            bounds = self.setBounds();
+            self.bindEvents();
+            $d.trigger('mousemove');
+        };
+    }
+
     $.fn.extend({
         simpleSlider: function (options) {
-            container = this;
-            Slider.init(options);
-            $(window).resize(function () {
-                Slider.destroy();
-                Slider.init(options);
-            });
+            return this.each(function () {
+                var opts = $.extend({}, {container: $(this)}, options);
+                (new Slider(opts)).construct();
+            })
         }
     });
 }(jQuery));
