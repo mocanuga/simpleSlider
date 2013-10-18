@@ -1,43 +1,72 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>jQuery PLUGINS</title>
+    <meta charset="utf-8">
+    <base href="/slider/">
+    <title>Horizontal sliders (for now)</title>
     <style type="text/css" media="screen">
         .wrapper {position: relative;}
-
-        .slider {background: #FB7700;clear: both;display: block;height: 4px;margin: 200px 20%;overflow: visible;position: relative;width: 60%;}
-        .slider .range {background: transparent;border-top: 4px solid #5889E1;display: block;height: 16px;left: 0;position: absolute;right: 0;top: 0;}
-        .slider a {background: #bbb;border: 1px solid #888;display: block;height: 22px;left: -2px;opacity:.7;position: absolute;top: -2px;width: 8px;}
-        .slider a.max {left: auto;right: -2px;}
+        .slider {background: #FB7700;clear: both;display: block;height: 4px;margin: 100px 20%;overflow: visible;position: relative;width: 60%;}
+        .slider .range {background: transparent;border-top: 4px solid #5889E1;bottom: 0;display: block;left: 0;position: absolute;right: 0;top: 0;}
+        .slider .info {background: none repeat scroll 0 0 rgba(0, 0, 0, 0);display: block;height: 20px;left: 0;position: absolute;top: -20px;width: 120px;}
+        .slider a {background: #bbb;border: 1px solid #888;display: block;height: 22px;opacity:.7;position: absolute;   width: 8px;}
         .slider .label {display: block;color: #333;position: relative;}
+        .slider.vertical {clear: none;float: left;height: 250px;margin: 100px 50px;width: 4px;}
+        .slider.vertical .range {border-left: 4px solid #5889E1;border-top: 0 none;}
+        .slider.vertical a {clear: none;height: 8px;width: 22px;}
     </style>
 </head>
 <body>
-<div class="wrapper">
-    <div class="sliderInfo"></div>
-    <div class="slider">
-        <div class="range"></div>
-        <a href="javascript:;" class="slide"></a>
+    <div class="wrapper">
+        <div class="slider">
+            <div class="info"></div>
+            <div class="range"></div>
+            <a href="javascript:void(0);" class="slide"></a>
+        </div>
+        <div class="slider">
+            <div class="info"></div>
+            <div class="range"></div>
+            <a href="javascript:void(0);" class="slide"></a>
+        </div>
+        <div class="slider">
+            <div class="info"></div>
+            <div class="range"></div>
+            <a href="javascript:void(0);" class="slide"></a>
+        </div>
+        <div class="slider vertical">
+            <div class="info"></div>
+            <div class="range"></div>
+            <a href="javascript:void(0);" class="slide"></a>
+        </div>
+        <div class="slider vertical">
+            <div class="info"></div>
+            <div class="range"></div>
+            <a href="javascript:void(0);" class="slide"></a>
+        </div>
+        <div class="slider vertical">
+            <div class="info"></div>
+            <div class="range"></div>
+            <a href="javascript:void(0);" class="slide"></a>
+        </div>
     </div>
-</div>
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-<script type="text/javascript" src="slider.js"></script>
-<script type="text/javascript">
-    $(document).ready(function() {
-       $('.slider').simpleSlider({
-           interval: {
-               min: 18,
-               max: 80
-           },
-           min: 24,
-           slide: function (value, percent, offset) {
-               $('.sliderInfo').text(value + ' anni');
-               $('.range').offset({
-                   left: offset
-               })
-           }
-       });
-    });
-</script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script type="text/javascript" src="js/slider.v2.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('.slider').simpleSlider({
+                interval: {
+                    min: 18,
+                    max: 80
+                },
+                limits: {
+                    min: 24
+                },
+                slide: function (container, value, percent, offset) {
+                    $('.info', container).text(value + ' anni');
+                    $('.range', container).offset(offset);
+                }
+            });
+        });
+    </script>
 </body>
 </html>
