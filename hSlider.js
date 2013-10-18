@@ -9,7 +9,6 @@
 (function ($) {
     var $d = $(document),
         $w = $(window);
-
     function Slider (opts) {
         var self = this,
             state = {
@@ -25,10 +24,10 @@
         this.setBounds = function () {
             var offset = container.offset();
             return {
-                bottom: offset.top + container.height() - handle.width(),
+                bottom: offset.top + container.height() - handle.height(),
                 left: offset.left,
                 right: offset.left + container.width() - handle.width(),
-                top: offset.top - handle.offset().top
+                top: offset.top
             };
         };
         this.getPercentageByValue = function (value, range) {
@@ -54,11 +53,11 @@
                 value = self.getValueByPercentage(percent, opts.interval);
                 m.top = position.y < bounds.top ? bounds.top : (position.y > bounds.bottom ? bounds.bottom : position.y);
             }
-            if (value >= opts.min) {
+            if (value >= opts.limits.min) {
                 handle.offset(m);
                 state.currentValue = value;
                 if (typeof opts.slide === 'function')
-                    opts.slide.apply(this, [container, value, percent, m.left]);
+                    opts.slide.apply(this, [container, value, percent, m]);
             }
         };
         this.bindEvents = function () {
@@ -79,7 +78,10 @@
                 }
                 if (state.init === false) {
                     state.init = true;
-                    self.handleMove({x: self.getValueByPercentage(self.getPercentageByValue(state.currentValue || opts.min, opts.interval), {min: bounds.left, max: bounds.right}), y: e.pageY - state.innerY});
+                    self.handleMove({
+                        x: self.getValueByPercentage(self.getPercentageByValue(state.currentValue || opts.limits.min, opts.interval), {min: bounds.left, max: bounds.right}),
+                        y: self.getValueByPercentage(self.getPercentageByValue(state.currentValue || opts.limits.min, opts.interval), {min: bounds.top, max: bounds.bottom})
+                    });
                 }
             }).on('mouseup', function (e) {
                 state.mouseDown = false;
@@ -97,13 +99,13 @@
             $d.trigger('mousemove');
         };
     }
-
     $.fn.extend({
         simpleSlider: function (options) {
             return this.each(function () {
                 var opts = $.extend({}, {container: $(this)}, options);
+                opts.direction = opts.container.hasClass('vertical') ? 'vertical' : 'horizontal';
                 (new Slider(opts)).construct();
-            })
+            });
         }
     });
 }(jQuery));
