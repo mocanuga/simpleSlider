@@ -1,6 +1,4 @@
-hSlider
+Slider
 =======
 
-jQuery plugin that handles a horizontal slider.
-
-The plugin is a part of a social networking service.
+jQuery plugin that handles a horizontal and vertical sliders.
