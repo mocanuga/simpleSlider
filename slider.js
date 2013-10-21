@@ -79,8 +79,8 @@
                 if (state.init === false) {
                     state.init = true;
                     self.handleMove({
-                        x: self.getValueByPercentage(self.getPercentageByValue(state.currentValue || opts.limits.min, opts.interval), {min: bounds.left, max: bounds.right}),
-                        y: self.getValueByPercentage(self.getPercentageByValue(state.currentValue || opts.limits.min, opts.interval), {min: bounds.top, max: bounds.bottom})
+                        x: self.getValueByPercentage(self.getPercentageByValue(state.currentValue || container.find('input').val() || opts.limits.min, opts.interval), {min: bounds.left, max: bounds.right}),
+                        y: self.getValueByPercentage(self.getPercentageByValue(state.currentValue || container.find('input').val() || opts.limits.min, opts.interval), {min: bounds.top, max: bounds.bottom})
                     });
                 }
             }).on('mouseup', function (e) {
