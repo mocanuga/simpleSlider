@@ -4,8 +4,8 @@
  * Date: 10/17/13
  * Time: 11:37 AM
  * To change this template use File | Settings | File Templates.
- * global jQuery
  */
+/*global jQuery*/
 (function ($) {
     'use strict';
     var $d = $(document), $w = $(window);
@@ -43,7 +43,7 @@
                 b.borderBottomWidth = parseInt(handleWidth.borderRightWidth, 10) - b.borderTopWidth;
                 m.top = (position.y < bounds.top ? bounds.top : (position.y > bounds.bottom ? bounds.bottom : position.y)) - b.borderTopWidth;
             }
-            if (value >= opts.limits.min) {
+            if (value >= opts.interval.min && value <= opts.interval.max) {
                 handle.offset(m).css(b);
                 state.currentValue = value;
                 if (typeof opts.slide === 'function') {
