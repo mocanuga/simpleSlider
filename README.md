@@ -1,4 +1,4 @@
 Slider
 =======
 
-jQuery plugin that handles a horizontal and vertical sliders.
+jQuery plugin that handles horizontal and vertical sliders.
